@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:mqtt/store.dart';
+import 'package:provider/provider.dart';
+
+import 'mqtt.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -6,8 +10,25 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  rightClick() {
+    print('123');
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Text("查看 mqtt 信息\r\n 连接按钮、断开按钮、提示信息");
+    final store = Provider.of<Store>(context);
+    return Column(
+      children: [
+        Text(store.mqttData.toString()),
+        ElevatedButton(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text("订阅频道"),
+            ),
+            onPressed: () {
+              MqttTool.getInstance().subscribe();
+            }),
+      ],
+    );
   }
 }

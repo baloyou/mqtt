@@ -8,6 +8,7 @@ class Subscribe extends StatefulWidget {
 class _SubscribeState extends State<Subscribe> {
   @override
   Widget build(BuildContext context) {
-    return Text("频道:____ 订阅按钮\r\n已订阅的频道列表、删除按钮\r\n 来自不同频道的消息列表\r\n时间、频道、消息内容");
+    return Text(
+        "先检查mqtt是否已连接\r\n频道:____ 订阅按钮\r\n已订阅的频道列表、删除按钮\r\n 来自不同频道的消息列表\r\n时间、频道、消息内容");
   }
 }

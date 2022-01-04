@@ -3,30 +3,34 @@ import 'package:mqtt/control.dart';
 import 'package:mqtt/home.dart';
 import 'package:mqtt/setting.dart';
 import 'package:mqtt/subscribe.dart';
+import 'package:mqtt/store.dart';
+import 'package:provider/provider.dart';
 
 //程序入口
-void main() => runApp(const MyApp());
+void main() => runApp(MyApp());
 
 //入口类
 class MyApp extends StatelessWidget {
   //用构造函数覆盖父类
-  const MyApp({Key key}) : super(key: key);
+  const MyApp({Key? key}) : super(key: key);
   //程序名称
   static const String _title = 'MQTT 控制器';
 
   //重写父类build方法，绘制界面
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(title: _title),
-    );
+    return ChangeNotifierProvider(
+        create: (_) => Store(),
+        child: MaterialApp(
+          title: _title,
+          home: MyStatefulWidget(title: _title),
+        ));
   }
 }
 
 //有状态的widget
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key key, this.title}) : super(key: key);
+  const MyStatefulWidget({Key? key, this.title = ''}) : super(key: key);
   final String title;
   @override
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
