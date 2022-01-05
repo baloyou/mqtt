@@ -10,10 +10,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  rightClick() {
-    print('123');
-  }
-
   @override
   Widget build(BuildContext context) {
     final store = Provider.of<Store>(context);
@@ -26,7 +22,11 @@ class _HomeState extends State<Home> {
               child: Text("订阅频道"),
             ),
             onPressed: () {
-              MqttTool.getInstance().subscribe();
+              if (MqttTool.getInstance().isConnect()) {
+                MqttTool.getInstance().subscribe();
+              } else {
+                print('mqtt is not connect.');
+              }
             }),
       ],
     );

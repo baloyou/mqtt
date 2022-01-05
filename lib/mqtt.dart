@@ -22,6 +22,14 @@ class MqttTool {
     mqttData = d;
   }
 
+  bool isConnect() {
+    if (mqttClient == null ||
+        mqttClient!.connectionStatus!.state != MqttConnectionState.connected) {
+      return false;
+    }
+    return true;
+  }
+
   //连接到mqtt
   Future<MqttClient?> connect() async {
     if (mqttClient == null) {

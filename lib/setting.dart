@@ -13,13 +13,6 @@ class Setting extends StatefulWidget {
 class _SettingState extends State<Setting> {
   GlobalKey _formKey = GlobalKey<FormState>();
   var logger = Logger();
-  MqttTool mt = MqttTool.getInstance();
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    mt.setConfig(Provider.of<Store>(context).mqttData);
-  }
 
   @override
   Widget build(BuildContext context) {

@@ -6,6 +6,8 @@ import 'package:mqtt/subscribe.dart';
 import 'package:mqtt/store.dart';
 import 'package:provider/provider.dart';
 
+import 'mqtt.dart';
+
 //程序入口
 void main() => runApp(MyApp());
 
@@ -54,6 +56,15 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  //全局注入共享状态
+  MqttTool mt = MqttTool.getInstance();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    mt.setConfig(Provider.of<Store>(context).mqttData);
   }
 
   @override
