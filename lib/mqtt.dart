@@ -56,15 +56,17 @@ class MqttTool {
   }
 
   //订阅频道
-  subscribe() {
+  subscribe(fn) {
     connect().then((mqttClient) {
       mqttClient!.subscribe("/test", MqttQos.atMostOnce);
       mqttClient.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
         final recMess = c![0].payload as MqttPublishMessage;
         final pt =
             MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-        print('topic is <${c[0].topic}>, payload is <-- $pt -->');
-        print('');
+        fn(c[0].topic, pt);
+        // print('topic is <${c[0].topic}>, payload is <-- $pt -->');
+        // print(pt);
+        // print(recMess);
       });
     });
   }

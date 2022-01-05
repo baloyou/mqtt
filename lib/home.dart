@@ -12,17 +12,20 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   //列表中使用的模拟数据
   final List items = [];
+  ScrollController _scrollController = ScrollController();
 
   //创建列表
   ListView lvb() {
-    print('start');
     return new ListView.builder(
+        reverse: true,
+        controller: _scrollController,
         scrollDirection: Axis.vertical,
         itemCount: items.length,
         itemBuilder: (context, index) {
-          print('build');
           return new ListTile(
-            title: new Text('${items[index]}'),
+            leading: Icon(Icons.map),
+            subtitle: new Text('${items[index][0]}'),
+            title: new Text('${items[index][1]}'),
           );
         });
   }
@@ -39,12 +42,15 @@ class _HomeState extends State<Home> {
               child: Text("订阅频道"),
             ),
             onPressed: () {
-              setState(() {
-                items.add('aaa');
-              });
-              print(items);
               if (MqttTool.getInstance().isConnect()) {
-                MqttTool.getInstance().subscribe();
+                MqttTool.getInstance().subscribe((topic, payload) {
+                  setState(() {
+                    items.add([topic, payload]);
+                    // items.add('$topic : $payload');
+                  });
+                  _scrollController
+                      .jumpTo(_scrollController.position.maxScrollExtent);
+                });
               } else {
                 print('mqtt is not connect.');
               }
