@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 
 import 'mqtt.dart';
 
-class Control extends StatefulWidget {
+class Home extends StatefulWidget {
   @override
-  State<Control> createState() => _ControlState();
+  State<Home> createState() => _HomeState();
 }
 
-class _ControlState extends State<Control> {
+class _HomeState extends State<Home> {
   //列表中使用的模拟数据
   final List items = [];
   ScrollController _scrollController = ScrollController();
@@ -49,7 +50,7 @@ class _ControlState extends State<Control> {
                 onPressed: () {
                   if (MqttTool.getInstance().isConnect()) {
                     MqttTool.getInstance().subscribe(
-                        'Controlassistant/sensor/sht30/sht30-temperature/config');
+                        'homeassistant/sensor/sht30/sht30-temperature/config');
                     MqttTool.getInstance().subscribe('sht30/sensor/+/state');
                   } else {
                     print('mqtt is not connect.');
@@ -60,7 +61,24 @@ class _ControlState extends State<Control> {
                   padding: const EdgeInsets.all(16.0),
                   child: Text("获取(${items.length})"),
                 ),
-                onPressed: () {}),
+                onPressed: () {
+                  if (MqttTool.getInstance().isConnect()) {
+                    MqttTool.getInstance().getSubscription((topic, payload) {
+                      //先检查widget是否处于可见状态，否则会刷屏报错
+                      if (this.mounted) {
+                        //更新状态items
+                        setState(() {
+                          items.add([topic, payload]);
+                        });
+                        //将滚动条定位到最后一条数据
+                        _scrollController
+                            .jumpTo(_scrollController.position.maxScrollExtent);
+                      }
+                    });
+                  } else {
+                    print('mqtt is not connect.');
+                  }
+                }),
             ElevatedButton(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -68,7 +86,7 @@ class _ControlState extends State<Control> {
                 ),
                 onPressed: () {
                   if (MqttTool.getInstance().isConnect()) {
-                    // MqttTool.getInstance().stopSubscription();
+                    MqttTool.getInstance().stopSubscription();
                   } else {
                     print('mqtt is not connect.');
                   }

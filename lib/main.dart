@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
   //用构造函数覆盖父类
   const MyApp({Key? key}) : super(key: key);
   //程序名称
-  static const String _title = 'MQTT 控制器';
+  static const String _title = 'ESPHOME 控制器 <MQTT>';
 
   //重写父类build方法，绘制界面
   @override
@@ -64,6 +64,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    print('main ==== didChangeDependencies');
     mt.setConfig(Provider.of<Store>(context).mqttData);
   }
 

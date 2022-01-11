@@ -1,14 +1,22 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:flutter_font_icons/flutter_font_icons.dart';
 
 class Store with ChangeNotifier {
+  Store() {
+    var rng = new Random();
+    mqttData['client_id'] = 'mqtt_${rng.nextInt(10000)}';
+  }
+
   Map mqttData = {
     'server': '192.168.1.254',
     'port': '1883',
     'username': 'admin',
     'password': 'admin',
     'ssl': false,
+    'client_id': null,
   };
 
   Map sensors = {

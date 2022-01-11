@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:mqtt/mqtt.dart';
 import 'package:mqtt/store.dart';
 import 'package:provider/provider.dart';
+
+import 'db/setting.dart';
 
 class Setting extends StatefulWidget {
   @override
@@ -13,6 +14,12 @@ class Setting extends StatefulWidget {
 class _SettingState extends State<Setting> {
   GlobalKey _formKey = GlobalKey<FormState>();
   var logger = Logger();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    print('setting ==== didChangeDependencies');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,16 +96,26 @@ class _SettingState extends State<Setting> {
                     child: ElevatedButton(
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
-                        child: Text("保存并连接"),
+                        child: Text("保存"),
                       ),
                       onPressed: () async {
                         // 通过_formKey.currentState 获取FormState后，
                         // 调用validate()方法校验用户名密码是否合法，校验
                         // 通过后再提交数据。
                         if ((_formKey.currentState as FormState).validate()) {
-                          //验证通过提交数据
+                          /// 验证通过保存数据到store
                           (_formKey.currentState as FormState).save();
-                          MqttTool.getInstance().connect();
+                          print(store.mqttData);
+
+                          /// 保存数据到数据库
+                          SettingModel settings = SettingModel();
+                          int id = await settings.save({
+                            'key': 'mqtt',
+                            'value': store.mqttData.toString(),
+                          });
+                          print('save=====');
+                          print(id);
+                          print(await settings.getList());
                         }
                       },
                     ),

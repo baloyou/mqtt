@@ -14,6 +14,7 @@ class MqttTool {
   MqttServerClient? mqttClient;
 
   //订阅的stream
+  // ignore: cancel_subscriptions
   StreamSubscription? _dataSubscription;
 
   //单例模式获取对象
@@ -39,9 +40,10 @@ class MqttTool {
   }
 
   //连接到mqtt
-  Future<MqttClient?> connect() async {
+  Future<MqttServerClient?> connect() async {
     if (mqttClient == null) {
-      mqttClient = MqttServerClient(mqttData!['server'], '12345');
+      mqttClient =
+          MqttServerClient(mqttData!['server'], mqttData!['client_id']);
     }
 
     ///已经处于连接状态，直接返回
@@ -57,39 +59,82 @@ class MqttTool {
     mqttClient!.logging(on: false);
     mqttClient!.keepAlivePeriod = 20;
 
+    await mqttClient!.connect(mqttData!['username'], mqttData!['password']);
+    return mqttClient;
+
     ///连接
+    // try {
+    //   print('re connected');
+    //   return mqttClient;
+    // } on Exception catch (e) {
+    //   print('EXAMPLE::client exception - $e');
+    //   mqttClient!.disconnect();
+    //   return throw Exception(e);
+    //   // return Future.delayed(Duration(milliseconds: 5000), () async {
+    //   //   return mqttClient = await connect();
+    //   // });
+    // }
+  }
+
+  Future reConnect() async {
     try {
-      await mqttClient!.connect(mqttData!['username'], mqttData!['password']);
-      print('re connected');
-      return mqttClient;
+      return mqttClient = await connect();
     } on Exception catch (e) {
-      print('EXAMPLE::client exception - $e');
-      mqttClient!.disconnect();
+      print(e);
+      Future.delayed(Duration(milliseconds: 5000), () async {
+        return mqttClient = await reConnect();
+      });
     }
   }
 
   /// 通过stream 获取订阅频道的数据
   /// 注意：不要重复调用，会造成重复订阅
-  getSubscription(fn) {
+  getSubscription(String topic, fn) async {
+    /// 连接MQTT
+    mqttClient = await connect();
+
+    /// 订阅频道
+    mqttClient!.subscribe(topic, MqttQos.atMostOnce);
+
+    /// 已经有此链接
+    // if (_dataSubscription != null) {
+    //   return;
+    // }
+    // _dataSubscription.
+    /// 通过stream 获取数据(如何避免它重复执行？)
     _dataSubscription = mqttClient!.updates!
         .listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
       final recMess = c![0].payload as MqttPublishMessage;
       final pt =
           MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
       fn(c[0].topic, pt);
-      // print('topic is <${c[0].topic}>, payload is <-- $pt -->');
+      print('topic is <${c[0].topic}>, payload is <-- $pt -->');
       // print(pt);
       // print(recMess);
     });
+    _dataSubscription!.onDone(() {
+      print('onDone===');
+    });
+    _dataSubscription!.onError((error) {
+      print('onError===$error');
+    });
   }
 
-  /// 停止订阅频道信息
-  stopSubscription() {
+  ///订阅stream之后的取消操作。
+  subAction(String ac) {
     if (_dataSubscription == null) {
       print('it is not subScription');
-      return;
+      return null;
     }
-    _dataSubscription!.cancel();
+    if (ac == 'cancel') {
+      return _dataSubscription!.cancel();
+    }
+    if (ac == 'pause') {
+      return _dataSubscription!.pause();
+    }
+    if (ac == 'resume') {
+      return _dataSubscription!.resume();
+    }
   }
 
   /// 订阅一个指定的频道
